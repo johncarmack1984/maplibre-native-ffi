@@ -225,14 +225,6 @@ reason = "Community builds of CPython target OpenHarmony. Build the extension ag
 link = "https://gitcode.com/ai_model_sig/ohos_python"
 
 [[entry]]
-bindings = ["go"]
-platforms = ["linux-gnu", "linux-musl"]
-archs = ["riscv64", "loongarch64"]
-status = "path-known"
-reason = "The suite passes under QEMU's user-mode emulator except its test that runs its own executable again, which needs the runners to register QEMU with binfmt_misc."
-link = "https://github.com/maplibre/maplibre-native-ffi/pull/1327"
-
-[[entry]]
 bindings = ["rust"]
 platforms = ["linux-gnu", "linux-musl"]
 archs = ["riscv64", "loongarch64"]
