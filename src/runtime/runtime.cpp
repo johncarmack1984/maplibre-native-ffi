@@ -30,6 +30,7 @@
 #include <mln/storage/resource_options.hpp>
 #include <mln/storage/response.hpp>
 #include <mln/storage/sqlite3.hpp>
+#include <mln/text/glyph_cache.hpp>
 #include <mln/util/client_options.hpp>
 #include <mln/util/expected.hpp>
 #include <mln/util/geo.hpp>
@@ -885,6 +886,7 @@ auto create_runtime(
 
   RuntimeCreationGuard result;
   result.runtime = std::make_shared<RuntimeObject>();
+  result.runtime->glyph_cache = std::make_shared<mln::GlyphCache>();
   auto asset_path = string_from_view(options->asset_path);
   auto cache_path = string_from_view(options->cache_path);
 

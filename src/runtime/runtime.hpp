@@ -28,6 +28,7 @@
 
 namespace mln {
 class DatabaseFileSource;
+class GlyphCache;
 class ResourceOptions;
 namespace delivery {
 class QueuedRegistration;
@@ -326,6 +327,10 @@ struct RuntimeObject {
   std::string asset_path;
   std::string cache_path;
   std::shared_ptr<mln::DatabaseFileSource> database_source;
+  // Every renderer of the runtime's maps shares the glyphs it parses here.
+  // Render sessions read it on host threads, so it is set before the runtime
+  // is published and never changes.
+  std::shared_ptr<mln::GlyphCache> glyph_cache;
   std::shared_ptr<mln::core::ResourceProviderState> resource_provider_state;
   std::shared_ptr<mln::core::OfflineRegionEventState> offline_event_state;
   std::shared_ptr<mln::core::ResourceTransformState> resource_transform_state;
