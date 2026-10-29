@@ -153,12 +153,6 @@ status = "path-known"
 reason = "Build the addon and run the Node suite in the FreeBSD VM. Node supports FreeBSD x64 as experimental and ships no official binaries."
 
 [[entry]]
-bindings = ["typescript"]
-platforms = ["android", "ios"]
-status = "path-known"
-reason = "Add an app host with a Node-API runtime, package the addon, and run tests on the emulator or simulator."
-
-[[entry]]
 bindings = [
   "dotnet",
   "dart",
