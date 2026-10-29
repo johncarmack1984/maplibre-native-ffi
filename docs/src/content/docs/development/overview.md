@@ -110,6 +110,17 @@ such as `files/bin/wine` in Steam's Proton, with a prefix under
 over the host's OpenGL and Vulkan over the host's Vulkan driver, so Windows CI
 remains the authority on Windows behavior.
 
+## Run selected CI units
+
+Manual CI runs accept a JSON array of units from `ci.units` in
+`.config/rubberstamp.yml`. For example, run the MSYS2 C suites on a branch:
+
+```sh
+gh workflow run CI --ref <branch> -f 'units=["mingw"]'
+```
+
+Leave `units` unset to run every unit. Hygiene runs with every selection.
+
 ## Debug on a CI runner
 
 [Blacksmith Testbox](https://github.com/useblacksmith/begin-testbox) runs
