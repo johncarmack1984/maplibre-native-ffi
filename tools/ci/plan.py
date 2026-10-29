@@ -197,7 +197,7 @@ ZIG_PROJECTS = (
     "//examples/zig-map:",
     "//examples/zig-readback:",
 )
-GRADLE_PROJECTS = ("//bindings/kotlin:", "//:kotlin:")
+GRADLE_PROJECTS = ("//bindings/java:", "//bindings/kotlin:", "//:kotlin:")
 SWIFT_PROJECTS = ("//bindings/swift:", "//examples/swift-map:")
 
 

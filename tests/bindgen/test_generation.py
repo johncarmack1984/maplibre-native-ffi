@@ -11,6 +11,7 @@ from tools.bindgen.emitters import (
     dart_native,
     dotnet,
     go,
+    java,
     kotlin,
     python,
     rust,
@@ -21,7 +22,7 @@ from tools.bindgen.emitters import (
 from tools.bindgen.model import ModelError
 from tools.bindgen.schema import validate
 
-EMITTERS = (dart, dotnet, go, kotlin, python, rust, swift, typescript, zig)
+EMITTERS = (dart, dotnet, go, kotlin, java, python, rust, swift, typescript, zig)
 
 # Protocol shapes an emitter's runtime cannot represent yet. Each emitter
 # reports these declarations as unsupported with its reason.

@@ -1,7 +1,7 @@
 """Emit the C declarations of the Kotlin binding and their four platform shims.
 
 Common code calls `C`, an expect object with one function per C function it
-uses. Every parameter is a primitive carrier (see kotlin_abi), so each shim is
+uses. Every parameter is a primitive carrier (see tools.bindgen.abi), so each shim is
 a uniform list of declarations:
 
 - JVM: one FFM downcall handle per function, and record layouts only for the
@@ -23,15 +23,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from ..model import CType, Function
-from ..protocol import (
-    COMPLETION,
-    COMPLETION_RESULT,
-    DIAGNOSTIC,
-    RENDER_ABANDON_RESULT,
-)
-from ..semantic import DeliverySupport
-from .kotlin_abi import (
+from tools.bindgen.abi import (
     POINTER,
     Abi,
     Array,
@@ -40,6 +32,15 @@ from .kotlin_abi import (
     Record,
     width_expression,
 )
+
+from ..model import CType, Function
+from ..protocol import (
+    COMPLETION,
+    COMPLETION_RESULT,
+    DIAGNOSTIC,
+    RENDER_ABANDON_RESULT,
+)
+from ..semantic import DeliverySupport
 from .kotlin_values import identifier
 
 PACKAGE = "org.maplibre.nativeffi.internal.c"

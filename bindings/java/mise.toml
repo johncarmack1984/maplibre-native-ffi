@@ -1,0 +1,7 @@
+[tools]
+"core:java" = "{{vars.java_version}}"
+
+[tasks.build]
+description = "Build the standalone Java FFM binding JAR."
+dir = "../.."
+run = "./gradlew :bindings:java:build -x :bindings:java:test"

@@ -5,10 +5,10 @@
 version: 1
 context: >-
   A C API for MapLibre Native, the C++ map renderer, which is vendored as a git
-  submodule with carried patches. Bindings for Dart, Go, Kotlin, .NET, Python,
-  Rust, Swift, TypeScript, and Zig wrap the C API, and example apps use them.
-  Mise defines tools and tasks, CMake builds the native library, and Gradle
-  builds the Kotlin packages.
+  submodule with carried patches. Bindings for Dart, Go, Java, Kotlin, .NET,
+  Python, Rust, Swift, TypeScript, and Zig wrap the C API, and example apps use
+  them. Mise defines tools and tasks, CMake builds the native library, and
+  Gradle builds the Java and Kotlin packages.
 
 labels:
   context: >-
@@ -420,17 +420,18 @@ ci:
           then: apply
     maven:
       covers: >-
-        Assembles and verifies the Kotlin Maven repository from every target's
-        artifacts, so it runs every target. Only changes to what that repository
-        contains or how it is staged and verified need it: the module set, POM
-        metadata, and artifact contents. Ordinary Kotlin changes and one
-        platform's native packaging don't.
+        Assembles and verifies the Java and Kotlin Maven repository from every
+        target's artifacts, so it runs every target. Only changes to what that
+        repository contains or how it is staged and verified need it: the module
+        set, POM metadata, and artifact contents. Ordinary Kotlin changes and
+        one platform's native packaging don't.
       rules:
         - if:
             files:
               - .mise/tasks/kotlin/publish
               - .mise/tasks/kotlin/verify-staging
               - tests/distribution/kotlin/**
+              - tests/distribution/java/**
           then: apply
     nuget:
       covers: >-

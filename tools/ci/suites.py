@@ -104,7 +104,10 @@ SUITES: list[dict] = [
     {
         "platforms": ["linux-gnu", "linux-musl", "macos", "windows", "freebsd"],
         "exclude": MACOS_X64,
-        "commands": [{"task": "//bindings/kotlin:test"}],
+        "commands": [
+            {"task": "//bindings/kotlin:test"},
+            {"task": "//bindings/java:test"},
+        ],
     },
     {
         "platforms": ["linux-gnu", "macos"],

@@ -57,13 +57,14 @@ ROOT_TARGET_MODULES = {
     },
 }
 
-MODULES = set(ROOT_TARGET_MODULES).union(
+MODULES = {"maplibre-native-ffi-java"} | set(ROOT_TARGET_MODULES).union(
     *(targets.values() for targets in ROOT_TARGET_MODULES.values())
 )
 
 # Modules with public Kotlin API. Their javadoc jars must carry the Dokka site,
 # not the manifest-only placeholders Maven Central tolerates for API-free modules.
 API_BEARING_MODULES = {
+    "maplibre-native-ffi-java",
     "maplibre-native-ffi",
     *ROOT_TARGET_MODULES["maplibre-native-ffi"].values(),
 }
@@ -270,7 +271,7 @@ def verify_javadoc(root: pathlib.Path) -> None:
                     f"{javadoc} does not contain generated documentation"
                 )
             if not any(
-                name.startswith("maplibre-native-ffi/org.maplibre.nativeffi")
+                name.startswith("org/maplibre/nativeffi/" if module.endswith("-java") else "maplibre-native-ffi/org.maplibre.nativeffi")
                 and name.endswith(".html")
                 for name in names
             ):
@@ -455,26 +456,26 @@ def verify_jvm_consumer(root: pathlib.Path) -> None:
     for backend in RUNTIME_MODULES:
         if classifier not in jvm_classifiers(backend):
             continue
-        result = subprocess.run(
-            [
-                gradlew,
-                "--quiet",
-                "--project-dir",
-                ROOT / "tests" / "distribution" / "kotlin",
-                "run",
-                f"-Pmaplibre.repository={root.resolve().as_uri()}",
-                f"-Pmaplibre.version={version}",
-                f"-Pmaplibre.backend={backend}",
-                f"-Pmaplibre.classifier={classifier}",
-            ],
-            check=False,
-        )
-        if result.returncode != 0:
-            raise SystemExit(
-                f"a Gradle JVM consumer of the {backend} runtime with {classifier} "
-                "failed to resolve the repository or load the native library"
+        for language in ("kotlin", "java"):
+            result = subprocess.run(
+                [
+                    gradlew,
+                    "--quiet",
+                    "--project-dir",
+                    ROOT / "tests" / "distribution" / language,
+                    "run",
+                    f"-Pmaplibre.repository={root.resolve().as_uri()}",
+                    f"-Pmaplibre.version={version}",
+                    f"-Pmaplibre.backend={backend}",
+                    f"-Pmaplibre.classifier={classifier}",
+                ],
+                check=False,
             )
-
+            if result.returncode != 0:
+                raise SystemExit(
+                    f"a Gradle JVM consumer of the {backend} runtime with {classifier} "
+                    "failed to resolve the repository or load the native library"
+                )
 
 def verify_native(root: pathlib.Path) -> None:
     modules = {

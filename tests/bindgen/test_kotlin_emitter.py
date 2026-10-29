@@ -16,8 +16,8 @@ from support import (
     run,
 )
 
+from tools.bindgen.abi import Abi, LayoutError
 from tools.bindgen.emitters import kotlin, kotlin_callbacks
-from tools.bindgen.emitters.kotlin_abi import Abi, LayoutError
 
 GENERATED = "src/commonMain/kotlin/org/maplibre/nativeffi"
 

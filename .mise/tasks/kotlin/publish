@@ -95,6 +95,7 @@ publish() {
     ":bindings:kotlin:runtimes:vulkan:publishAndroidPublicationTo${repository}"
 
   publication_tasks=()
+  add_publications :bindings:java Maven
   add_publications :bindings:kotlin KotlinMultiplatform Jvm "${apple[@]}"
   add_publications :bindings:kotlin:runtimes:opengl KotlinMultiplatform Jvm MacosArm64
   add_publications :bindings:kotlin:runtimes:vulkan KotlinMultiplatform Jvm MacosArm64

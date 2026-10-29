@@ -20,6 +20,7 @@ BINDINGS = (
     "go",
     "zig",
     "kotlin",
+    "java",
     "swift",
     "dotnet",
     "dart",

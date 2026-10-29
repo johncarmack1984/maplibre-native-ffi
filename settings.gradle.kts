@@ -8,6 +8,8 @@ pluginManagement {
 
 rootProject.name = "maplibre-native-ffi"
 
+include(":bindings:java")
+
 include(":bindings:kotlin")
 
 include(":bindings:kotlin:runtimes:metal")

@@ -1,7 +1,7 @@
 # Repository guidance
 
 MapLibre Native FFI is a C API for MapLibre Native. A generator writes low-level
-bindings for nine languages from its headers, over a handwritten runtime in each
+bindings for ten languages from its headers, over a handwritten runtime in each
 binding. Mise provides every tool and task, and `mise tasks --all` lists them.
 
 ## Priorities

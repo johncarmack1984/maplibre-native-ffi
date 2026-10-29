@@ -25,6 +25,7 @@ LANGUAGES = (
     "dart",
     "dotnet",
     "go",
+    "java",
     "kotlin",
     "python",
     "rust",

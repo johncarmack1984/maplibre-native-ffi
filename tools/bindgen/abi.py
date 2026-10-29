@@ -1,23 +1,15 @@
-"""Lay out C types and lower C signatures to the Kotlin native-call carriers.
+"""Compute natural C layouts and native carriers for the Java and Kotlin bindings.
 
-The Kotlin binding marshals every value in common code, so each platform shim
-passes only primitives: integers, floats, and addresses carried as `Long`. A
-record that C passes by value crosses as the address of a copy, and a record
-that C returns by value is written to an address the caller supplies.
-
-Common code reads and writes records at offsets computed here for both data
-models a Kotlin target can have: ILP32 (Android ARM32) and LP64 (everything
-else). Every target follows the C natural-alignment rules, which hold on the
-supported ABIs, including the 8-byte alignment that ARM EABI gives 64-bit
-fields. A generator test compiles these offsets as static assertions for both
-data models.
+The C API uses fixed-width scalars and pointer-sized integers. Layouts cover
+ILP32 and 64-bit hosts, including the 8-byte alignment ARM EABI gives 64-bit
+fields. Generator tests check these layouts against the C compiler.
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass
 
-from ..model import Api, CType
+from .model import Api, CType
 
 
 class LayoutError(ValueError):

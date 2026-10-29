@@ -158,6 +158,23 @@ Swift imports the module `MaplibreNativeC`, and C includes
 Each binding wraps the C library in one language. Most carry or download the C
 library, and the sections that need an installed prefix say so.
 
+### Java
+
+The desktop Java binding requires JDK 25 and uses FFM. Add the Java API and the
+native runtime JAR for your backend and platform:
+
+```kotlin title="build.gradle.kts"
+dependencies {
+  implementation("org.maplibre.nativeffi:maplibre-native-ffi-java:$version")
+  runtimeOnly("org.maplibre.nativeffi:maplibre-native-ffi-runtime-metal-jvm:$version:natives-macos-arm64@jar")
+}
+```
+
+Run with `--enable-native-access=ALL-UNNAMED`. Use the same version for the API
+and runtime. The desktop runtime classifiers listed under Kotlin also work with
+Java. This binding has no Kotlin runtime dependency and does not support
+Android.
+
 ### Kotlin
 
 Add Maven Central, the binding, and the runtime for your backend. On the JVM,

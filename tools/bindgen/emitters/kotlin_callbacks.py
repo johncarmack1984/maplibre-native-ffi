@@ -569,7 +569,7 @@ def sites(values):
 
 def carrier(value, values):
     """The native-call carrier of a callback parameter or result."""
-    from .kotlin_abi import Record
+    from tools.bindgen.abi import Record
 
     if value.native == "void":
         return "Unit"
