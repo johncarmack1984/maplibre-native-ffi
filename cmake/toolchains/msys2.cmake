@@ -11,6 +11,9 @@ list(APPEND CMAKE_TRY_COMPILE_PLATFORM_VARIABLES MLN_FFI_MSYS2_ROOT)
 
 set(CMAKE_C_COMPILER "${MLN_FFI_MSYS2_ROOT}/bin/clang.exe")
 set(CMAKE_CXX_COMPILER "${MLN_FFI_MSYS2_ROOT}/bin/clang++.exe")
+# The engine and platform archives refer back to each other; LLD resolves
+# those references without depending on archive order.
+set(CMAKE_LINKER_TYPE LLD)
 set(CMAKE_AR "${MLN_FFI_MSYS2_ROOT}/bin/llvm-ar.exe" CACHE FILEPATH "" FORCE)
 set(CMAKE_RANLIB "${MLN_FFI_MSYS2_ROOT}/bin/llvm-ranlib.exe"
     CACHE FILEPATH "" FORCE)
