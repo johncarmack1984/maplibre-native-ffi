@@ -15,6 +15,7 @@
 #include <Metal/MTLBlitPass.hpp>
 #include <Metal/MTLCommandBuffer.hpp>
 #include <Metal/MTLCommandQueue.hpp>
+#include <Metal/MTLEvent.hpp>
 #include <Metal/MTLRenderPass.hpp>
 #include <Metal/MTLTexture.hpp>
 #include <TargetConditionals.h>
@@ -111,6 +112,12 @@ class MetalTextureBackend::MetalTextureRenderableResource final
     assert(context.getBackend().getCommandQueue());
     commandBuffer =
       NS::RetainPtr(context.getBackend().getCommandQueue()->commandBuffer());
+    // A wait applies to the passes encoded after it in the command buffer.
+    // Each pass binds a new buffer, and only the last one commits, so every
+    // buffer gets the waits until the frame commits.
+    for (const auto& wait : backend.event_waits_) {
+      commandBuffer->encodeWait(wait.event.get(), wait.value);
+    }
     renderPassDescriptor =
       NS::TransferPtr(MTL::RenderPassDescriptor::alloc()->init());
     if (
@@ -283,13 +290,33 @@ auto MetalTextureBackend::metal_texture() -> MTL::Texture* {
 }
 
 void MetalTextureBackend::commit(NS::SharedPtr<MTL::CommandBuffer> buffer) {
+  if (producer_sync_kind_ == MLN_GPU_SYNC_METAL_SHARED_EVENT) {
+    if (!event_) event_ = NS::TransferPtr(device->newSharedEvent());
+    buffer->encodeSignalEvent(event_.get(), ++event_value_);
+  }
   buffer->commit();
-  if (queue_ordered_) {
+  event_waits_.clear();
+  if (producer_sync_kind_ != MLN_GPU_SYNC_CPU_COMPLETE) {
     in_flight_ = std::move(buffer);
     return;
   }
   buffer->waitUntilCompleted();
   record_command_buffer_result(*buffer.get());
+}
+
+auto MetalTextureBackend::producer_sync() const -> mln_gpu_sync {
+  return mln_gpu_sync{
+    .size = sizeof(mln_gpu_sync),
+    .kind = producer_sync_kind_,
+    .handle = static_cast<uint64_t>(reinterpret_cast<uintptr_t>(event_.get())),
+    .value = event_value_,
+  };
+}
+
+void MetalTextureBackend::wait_event(MTL::SharedEvent* event, uint64_t value) {
+  event_waits_.push_back(
+    EventWait{.event = NS::RetainPtr(event), .value = value}
+  );
 }
 
 void MetalTextureBackend::finish_frame() {
