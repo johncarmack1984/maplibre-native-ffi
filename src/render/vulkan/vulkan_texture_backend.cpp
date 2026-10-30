@@ -81,10 +81,17 @@ class VulkanTextureBackend::VulkanTextureRenderableResource final
   }
 
   // Renders into `slot` at `size` from here on, building whatever the slot
-  // lacks. swap() waits for each frame, so the attachments a rebuild replaces
-  // are idle. A slot whose frame the host holds is never selected, so its
-  // color image survives a rebuild of another slot.
+  // lacks. A slot whose frame the host holds is never selected, so its color
+  // image survives a rebuild of another slot.
   void select(std::size_t slot, vk::Extent2D size) {
+    // A queue-ordered frame may still render, and a frame released in queue
+    // order may still be read, so a rebuild first waits for the shared queue.
+    const auto& built = slots_.at(slot);
+    if (
+      renderPass &&
+      (depth_extent_ != size || (built.image && built.extent != size))
+    )
+      backend.getGraphicsQueue().waitIdle(backend.getDispatcher());
     selected_ = slot;
     extent = size;
     if (!renderPass) {
@@ -142,6 +149,9 @@ class VulkanTextureBackend::VulkanTextureRenderableResource final
     ) {
       restore_borrowed_initial_layout(initial_layout, final_layout);
     }
+    // A queue-ordered frame is acquirable once submitted. The next frame's
+    // begin waits for it, so one frame at most is in flight.
+    if (owner_.queue_ordered_) return;
     // This resource is only used by VulkanTextureBackend, so the downcast is
     // invariant within this file.
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-static-cast-downcast)
@@ -281,11 +291,27 @@ class VulkanTextureBackend::VulkanTextureRenderableResource final
         .setColorAttachmentCount(1)
         .setColorAttachments(color_attachment_ref)
         .setPDepthStencilAttachment(&depth_attachment_ref);
+    // The external dependencies span every stage the queue runs, so they also
+    // order the host's reads that a queue-ordered frame shares the queue with:
+    // before the render overwrites the image, and after its writes and final
+    // layout. ALL_COMMANDS means only the graphics stages in a subpass
+    // dependency, so transfer and compute are named.
+    auto queue_stages =
+      vk::PipelineStageFlags{vk::PipelineStageFlagBits::eAllGraphics} |
+      vk::PipelineStageFlagBits::eTransfer;
+    const auto families =
+      backend.getPhysicalDevice().getQueueFamilyProperties(dispatcher);
+    if (
+      families.at(static_cast<std::size_t>(backend.getGraphicsQueueIndex()))
+        .queueFlags &
+      vk::QueueFlagBits::eCompute
+    )
+      queue_stages |= vk::PipelineStageFlagBits::eComputeShader;
     const std::array<vk::SubpassDependency, 3> dependencies = {
       vk::SubpassDependency()
         .setSrcSubpass(VK_SUBPASS_EXTERNAL)
         .setDstSubpass(0)
-        .setSrcStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput)
+        .setSrcStageMask(queue_stages)
         .setDstStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput)
         .setSrcAccessMask({})
         .setDstAccessMask(vk::AccessFlagBits::eColorAttachmentWrite),
@@ -310,9 +336,9 @@ class VulkanTextureBackend::VulkanTextureRenderableResource final
         .setSrcSubpass(0)
         .setDstSubpass(VK_SUBPASS_EXTERNAL)
         .setSrcStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput)
-        .setDstStageMask(vk::PipelineStageFlagBits::eFragmentShader)
+        .setDstStageMask(queue_stages)
         .setSrcAccessMask(vk::AccessFlagBits::eColorAttachmentWrite)
-        .setDstAccessMask(vk::AccessFlagBits::eShaderRead),
+        .setDstAccessMask(vk::AccessFlagBits::eMemoryRead),
     };
     const auto render_pass_create_info = vk::RenderPassCreateInfo()
                                            .setAttachments(attachments)
@@ -401,6 +427,16 @@ VulkanTextureBackend::VulkanTextureBackend(
 }
 
 VulkanTextureBackend::~VulkanTextureBackend() {
+  // A queue-ordered frame may still render, and the host's reads of one it
+  // released may still run, so the ring's images wait for the shared queue.
+  if (graphicsQueue) {
+    try {
+      graphicsQueue.waitIdle(dispatcher);
+    } catch (const vk::DeviceLostError&) {
+      // A lost device has finished every submission. Any other failure leaves
+      // work in flight, so it ends the process, as mbgl's teardown does.
+    }
+  }
   auto guard = mln::gfx::BackendScope{*this};
   resource.reset();
   getThreadPool().runRenderJobs(true);
