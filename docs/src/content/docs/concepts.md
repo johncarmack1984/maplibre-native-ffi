@@ -1,19 +1,16 @@
 ---
 title: Concepts
 description: The parts of MapLibre Native FFI that every integration uses.
+# Scope: the few ideas every integration needs, in terms every binding shares. No
+# feature tours, no C-specific details, no task steps, and no contracts; those
+# belong in guides and the API reference.
 ---
-
-<!--
-Scope: the few ideas every integration needs, in terms every binding shares. No
-feature tours, no C-specific details, no task steps, and no contracts; those
-belong in guides and the API reference.
--->
 
 MapLibre Native FFI is the MapLibre Native map engine without a user interface.
 It loads styles and data, keeps the state of each map, and renders it. Your
 application provides everything else, such as the window and input of an
 interactive map, or the request handling of a tile server.
-[Examples](/maplibre-native-ffi/examples/) lists projects that use it.
+[Projects](/maplibre-native-ffi/#projects) lists some that use it.
 
 ## C API and bindings
 
